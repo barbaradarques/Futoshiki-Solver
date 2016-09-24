@@ -19,7 +19,8 @@
 void solve();
 bool addNumber();
 void printBoard();
+void printRestrictions();
 void resetRestrictions();
-bool isValid(char num, char row, char col);
+bool isValid(char num, int row, int col);
 void setRestriction(int row1, int col1, int row2, int col2);
 #endif
