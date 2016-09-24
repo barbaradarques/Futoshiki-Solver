@@ -3,14 +3,23 @@
 
 #include <iostream>
 
-#define GREATER 2
-#define LESS 1
-#define NONE 0
+#define MAX_SIZE 9
+
+// Flags armazenadas em cada byte da matriz de restrições
+#define GTR_THAN_TOP 1
+#define LS_THAN_TOP (1 << 1)
+#define GTR_THAN_BOTTOM (1 << 2)
+#define LS_THAN_BOTTOM (1 << 3)
+#define GTR_THAN_RIGHT (1 << 4)
+#define LS_THAN_RIGHT (1 << 5)
+#define GTR_THAN_LEFT (1 << 6)
+#define LS_THAN_LEFT (1 << 7)
+
 
 void solve();
 bool addNumber();
 void printBoard();
 void resetRestrictions();
-bool isPossible(char num, char row, char col);
+bool isValid(char num, char row, char col);
 void setRestriction(int row1, int col1, int row2, int col2);
 #endif
