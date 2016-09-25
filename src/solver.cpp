@@ -16,9 +16,12 @@ void solve(char l_method){
 	resetRestrictions();
 	resetPossibilities();
 	// seta os valores iniciais
-	for(int i = 0; i < size; ++i){
+	for(int i = 0, digit = 0; i < size; ++i){
 		for(int j = 0; j < size; ++j){
-			cin >> board[i][j];
+			cin >> digit;
+			board[i][j] = digit;
+			if(digit != 0)
+				updatePossibilities(digit, i, j);
 		}
 	}
 	// seta as restrições
@@ -198,7 +201,7 @@ bool addNumber(){
 					// recupera as possibilidades antes da escolha
 					for(int i = 0; i < size; ++i){
 						possibilities[emptyRow][i] = savedRowPossibilities[i];
-						possibilities[i][emptyCol] =savedColPossibilities[i];
+						possibilities[i][emptyCol] = savedColPossibilities[i];
 					}
 				} else { // se deu certo
 					return true;
@@ -220,11 +223,13 @@ bool addNumber(){
 
 bool updatePossibilities(char num, int row, int col){
 	for(int i = 0; i < size; ++i){
-		possibilities[row][i][num-1] = 0;
-		possibilities[i][col][num-1] = 0;
-		if(possibilities[row][i] == 0 || possibilities[i][row] == 0) // se acabar com as possibilidades de alguém
+		if(i != col)	possibilities[row][i][num-1] = 0;
+		if(i != row)	possibilities[i][col][num-1] = 0;
+		if(possibilities[row][i]<<(MAX_SIZE-size) == 0 || possibilities[i][row]<<(MAX_SIZE-size) == 0){ // se acabar com as possibilidades de alguém
 			return false;
+		}
 	}
+
 
 	return true;
 }
