@@ -1,15 +1,20 @@
 #include "solver.hpp"
 
-static int  size, board[MAX_SIZE][MAX_SIZE];
+static int  size, board[MAX_SIZE][MAX_SIZE], num_calls;
 static char restrictions[MAX_SIZE][MAX_SIZE];
+static _9bits possibilities[MAX_SIZE][MAX_SIZE];
+static char method;
 
 using namespace std;
 
-void solve(){
+void solve(char l_method){
 	int numRestrictions; // quantidade de restrições
 	cin >> size;
 	cin >> numRestrictions;
+	method = l_method; // <<<<<<< mudar dps pra leitura aqui dentro (ao invés de passar argumento)
+	num_calls = 0; // número de chamadas recursivas/ atribuições feitas
 	resetRestrictions();
+	resetPossibilities();
 	// seta os valores iniciais
 	for(int i = 0; i < size; ++i){
 		for(int j = 0; j < size; ++j){
@@ -24,7 +29,7 @@ void solve(){
 	}
 	addNumber();
 	printBoard();
-	// printRestrictions();
+	cout << num_calls << " chamadas." << endl;
 }
 
 void printBoard(){
@@ -35,10 +40,10 @@ void printBoard(){
 		cout << endl;
 	}
 }
-void printRestrictions(){
+void printRestrictions(){ // <<<<<<<<<<<<<< apagar função
 	for(int i = 0; i < size; ++i){
 		for(int j = 0; j < size; ++j){
-			cout << (restrictions[i][j]==0 ? 0 : 1)  << " "; // consertar pra não imprimir espaço extra no final da linha <<<<<<
+			cout << (restrictions[i][j]==0 ? 0 : 1)  << " "; 
 		}
 		cout << endl;
 	}
@@ -48,6 +53,13 @@ void resetRestrictions(){
 	for(int i = 0; i < MAX_SIZE; ++i){
 		for(int j = 0; j< MAX_SIZE; ++j){
 			restrictions[i][j] = 0;
+		}                                                   
+	}
+}
+void resetPossibilities(){
+	for(int i = 0; i < MAX_SIZE; ++i){
+		for(int j = 0; j< MAX_SIZE; ++j){
+			possibilities[i][j] = ~0; // seta todos os bits pra 1
 		}                                                   
 	}
 }
@@ -85,18 +97,21 @@ void setRestriction(int row1, int col1, int row2, int col2){
 
 bool isValid(char num, int row, int col){
 	// cout << row << " : " << col << endl;
-
-	// checa se já existe esse dígito naquela linha
-	for(int i = 0; i < size; ++i){
-		if(board[row][i] == num){
+	if(method == FORWARD_CHECKING){
+		if(possibilities[row][col][num-1] == 0) // num-1 pois os dígitos começam em 1, mas o vetor em 0 
 			return false;
+	} else {// checa se já existe esse dígito naquela linha
+		for(int i = 0; i < size; ++i){
+			if(board[row][i] == num){
+				return false;
+			}
 		}
-	}
 
-	// checa se já existe esse dígito naquela coluna
-	for(int i = 0; i < size; ++i){
-		if(board[i][col] == num){
-			return false;
+		// checa se já existe esse dígito naquela coluna
+		for(int i = 0; i < size; ++i){
+			if(board[i][col] == num){
+				return false;
+			}
 		}
 	}
 
@@ -146,14 +161,15 @@ bool isValid(char num, int row, int col){
 
 
 bool addNumber(){
+	++num_calls;
 	//cout << "Nova chamada" << endl;
 	// busca espaço vazio
-	int nextEmptyRow = 0, nextEmptyCol = 0;
+	int emptyRow = 0, emptyCol = 0;
 	for(int i = 0; i < size; ++i){
 		for(int j = 0; j < size; ++j){
 			if(!board[i][j]){
-				nextEmptyRow = i;
-				nextEmptyCol = j;
+				emptyRow = i;
+				emptyCol = j;
 				goto searchEnd;
 			}
 		}
@@ -162,15 +178,50 @@ bool addNumber(){
 	searchEnd:
 	// testa todos os valores nessa posição
 	for(int n = 1; n <= size; ++n){
-		if(isValid(n, nextEmptyRow, nextEmptyCol)){
-			board[nextEmptyRow][nextEmptyCol] = n;
-			if(!addNumber()){ // se tiver chegado a um ponto sem solução
-				board[nextEmptyRow][nextEmptyCol] = 0; // desfaz a escolha
-			} else { // se deu certo
-				return true;
+		if(isValid(n, emptyRow, emptyCol)){
+			board[emptyRow][emptyCol] = n;
+			//===================== COM VERIFICAÇÃO ADIANTE ======================
+			if(method == FORWARD_CHECKING){
+				_9bits savedRowPossibilities[size];
+				_9bits savedColPossibilities[size];
+				for(int i = 0; i < size; ++i){
+					savedRowPossibilities[i] = possibilities[emptyRow][i];
+					savedColPossibilities[i] = possibilities[i][emptyCol];
+				}
+				
+				if(!updatePossibilities(n, emptyRow, emptyCol) || !addNumber()){ // se tiver chegado a um ponto sem solução
+					// desfaz a escolha
+					board[emptyRow][emptyCol] = 0; 
+					// recupera as possibilidades antes da escolha
+					for(int i = 0; i < size; ++i){
+						possibilities[emptyRow][i] = savedRowPossibilities[i];
+						possibilities[i][emptyCol] =savedColPossibilities[i];
+					}
+				} else { // se deu certo
+					return true;
+				}
+			//============================= BACKTRACKING APENAS ===================
+			} else {
+				if(!addNumber()){ // se tiver chegado a um ponto sem solução
+					// desfaz a escolha
+					board[emptyRow][emptyCol] = 0; 
+				} else { // se deu certo
+					return true;
+				}
 			}
 
 		}
 	}
 	return false;
+}
+
+bool updatePossibilities(char num, int row, int col){
+	for(int i = 0; i < size; ++i){
+		possibilities[row][i][num-1] = 0;
+		possibilities[i][col][num-1] = 0;
+		if(possibilities[row][i] == 0 || possibilities[i][row] == 0) // se acabar com as possibilidades de alguém
+			return false;
+	}
+
+	return true;
 }
