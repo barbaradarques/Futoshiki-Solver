@@ -8,7 +8,7 @@ int main(){
 	cin >> tests;
 	for(int i = 1; i <= tests; ++i){
 		cout << i << endl;
-		solve(BACKTRACKING);
+		solve(FORWARD_CHECKING);
 	}
 	return 0;
 }

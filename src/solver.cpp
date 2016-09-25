@@ -56,16 +56,22 @@ void printRestrictions(){ // <<<<<<<<<<<<<< apagar função
 }
 
 void resetRestrictions(){
-	for(int i = 0; i < MAX_SIZE; ++i){
-		for(int j = 0; j< MAX_SIZE; ++j){
+	for(int i = 0; i < size; ++i){
+		for(int j = 0; j< size; ++j){
 			restrictions[i][j] = 0;
 		}                                                   
 	}
 }
 void resetPossibilities(){
-	for(int i = 0; i < MAX_SIZE; ++i){
-		for(int j = 0; j< MAX_SIZE; ++j){
-			possibilities[i][j] = ~0; // seta todos os bits pra 1
+	_9bits initial = ~0; // status inicial padrão, marca todos os dígitos válidos com 1 e inválidos com 0
+	for(int i = MAX_SIZE-1; i > size-1; --i){
+		initial[i] = 0;
+	}
+
+	// seta as possibilidades de todos os quadrados com o status inicial
+	for(int i = 0; i < size; ++i){
+		for(int j = 0; j< size; ++j){
+			possibilities[i][j] = initial;
 		}                                                   
 	}
 }
@@ -168,7 +174,6 @@ bool isValid(char num, int row, int col){
 
 bool addNumber(){
 	++num_calls;
-	//cout << "Nova chamada" << endl;
 	// busca espaço vazio
 	int emptyRow = 0, emptyCol = 0;
 	for(int i = 0; i < size; ++i){
@@ -225,11 +230,10 @@ bool updatePossibilities(char num, int row, int col){
 	for(int i = 0; i < size; ++i){
 		if(i != col)	possibilities[row][i][num-1] = 0;
 		if(i != row)	possibilities[i][col][num-1] = 0;
-		if(possibilities[row][i]<<(MAX_SIZE-size) == 0 || possibilities[i][row]<<(MAX_SIZE-size) == 0){ // se acabar com as possibilidades de alguém
+		if(possibilities[row][i] == 0 || possibilities[i][row] == 0){ // se acabar com as possibilidades de alguém
 			return false;
 		}
 	}
-
 
 	return true;
 }
