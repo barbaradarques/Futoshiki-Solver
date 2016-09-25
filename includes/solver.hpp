@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <bitset>
+#include <chrono>
 
 #define MAX_SIZE 9
 #define BACKTRACKING 0 // backtracing sozinho
 #define FORWARD_CHECKING 1 // backtracking com verificação adiante
 #define MRV 2 // backtracking com verificação adiante e mínimos valores remanescentes
+
 // Flags armazenadas em cada byte da matriz de restrições
 #define GTR_THAN_TOP 1
 #define LS_THAN_TOP (1 << 1)

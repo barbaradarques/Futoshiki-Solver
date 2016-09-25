@@ -27,9 +27,12 @@ void solve(char l_method){
 		cin >> row1 >> col1 >> row2 >> col2; 
 		setRestriction(row1-1, col1-1, row2-1, col2-1); // corrige para início da contagem em 0
 	}
+	chrono::steady_clock::time_point start = chrono::steady_clock::now(), end;
 	addNumber();
+	end = chrono::steady_clock::now();
 	printBoard();
-	cout << num_calls << " chamadas." << endl;
+	cout << num_calls << " chamadas em ";
+	cout << chrono::duration_cast<chrono::duration<double> > (end-start).count() << "s." << endl;
 }
 
 void printBoard(){
