@@ -1,11 +1,17 @@
 #include "solver.hpp"
 
+using namespace std;
+
 static int  size, board[MAX_SIZE][MAX_SIZE], num_calls;
 static char restrictions[MAX_SIZE][MAX_SIZE];
 static _9bits possibilities[MAX_SIZE][MAX_SIZE];
 static char method;
 
-using namespace std;
+// sobrecarrega o operador de comparação do _pair                                        
+bool operator<(const _pair & a, const _pair & b){   
+    return (a.second > b.second);                                    
+} 
+
 
 void solve(char l_method){
 	int numRestrictions; // quantidade de restrições
@@ -46,14 +52,6 @@ void printBoard(){
 		cout << endl;
 	}
 }
-void printRestrictions(){ // <<<<<<<<<<<<<< apagar função
-	for(int i = 0; i < size; ++i){
-		for(int j = 0; j < size; ++j){
-			cout << (restrictions[i][j]==0 ? 0 : 1)  << " "; 
-		}
-		cout << endl;
-	}
-}
 
 void resetRestrictions(){
 	for(int i = 0; i < size; ++i){
@@ -81,26 +79,21 @@ void resetPossibilities(){
  */
 
 void setRestriction(int row1, int col1, int row2, int col2){
-	// cout << row1 << col1 << " " << row2 << col2 << endl;
 	if(row1 == row2){ // se estiverem na mesma linha
 		if(col1 < col2){ // se o menor está mais à esquerda 
-			// cout<<"|-> 1"<<endl;
 			restrictions[row1][col1] |= LS_THAN_RIGHT;
 			restrictions[row2][col2] |= GTR_THAN_LEFT;
 		} else { // se o menor estiver mais à direita, inverte-se a direção do sinal
-			// cout<<"|-> 2"<<endl;
-			restrictions[row1][col1] |= GTR_THAN_RIGHT;
-			restrictions[row2][col2] |= LS_THAN_LEFT;
+			restrictions[row1][col1] |= LS_THAN_LEFT;
+			restrictions[row2][col2] |= GTR_THAN_RIGHT;
 		}
 	} else if(col1 == col2){ // teste redundante, pois se as linhas não são iguais, as colunas têm que ser <<
 		if(row1 < row2){ // se o menor está mais acima
-			// cout<<"|-> 3"<<endl;
 			restrictions[row1][col1] |= LS_THAN_BOTTOM;
 			restrictions[row2][col2] |= GTR_THAN_TOP;
-		} else { // se o menor está mais abaixo, inverte-se a direção do sinal
-			// cout<<"|-> 4"<<endl;
-			restrictions[row1][col1] |= GTR_THAN_BOTTOM;
-			restrictions[row2][col2] |= LS_THAN_TOP;
+		} else { // (row2 < row1) se o menor está mais abaixo, inverte-se a direção do sinal
+			restrictions[row1][col1] |= LS_THAN_TOP;
+			restrictions[row2][col2] |= GTR_THAN_BOTTOM;
 		}
 	}
 }
@@ -108,11 +101,17 @@ void setRestriction(int row1, int col1, int row2, int col2){
 // talvez usar ponteiro pra função dependendo da flag? <<<<<<<<<<
 
 bool isValid(char num, int row, int col){
-	// cout << row << " : " << col << endl;
-	if(method == FORWARD_CHECKING){
+	
+	if(method != BACKTRACKING){
+		// ===== Checagem baseada na verificação adiante ======
+
 		if(possibilities[row][col][num-1] == 0) // num-1 pois os dígitos começam em 1, mas o vetor em 0 
 			return false;
-	} else {// checa se já existe esse dígito naquela linha
+
+	} else {
+		// ================ Checagem manual ===================
+
+		// checa se já existe esse dígito naquela linha
 		for(int i = 0; i < size; ++i){
 			if(board[row][i] == num){
 				return false;
@@ -125,48 +124,50 @@ bool isValid(char num, int row, int col){
 				return false;
 			}
 		}
+
+		// Checa restrições(maior ou menor que algo):
+		// Explicação: 
+		// - Se AND der diferente de 0, a restrição está contida no conjunto de restrições.
+		
+
+		// relação com o quadrado inferior
+		if(restrictions[row][col] & GTR_THAN_BOTTOM){
+			if(num < board[row+1][col])
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_BOTTOM){
+			if((board[row+1][col] != 0) && (num > board[row+1][col]))
+				return false;
+		}
+
+		//relação com quadrado superior
+		if(restrictions[row][col] & GTR_THAN_TOP){
+			if(num < board[row-1][col])
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_TOP){
+			if((board[row-1][col] != 0) && (num > board[row-1][col]))
+				return false;
+		}
+
+		//relação com quadrado direito
+		if(restrictions[row][col] & GTR_THAN_RIGHT){
+			if(num < board[row][col+1])
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_RIGHT){
+			if((board[row][col+1] != 0) && (num > board[row][col+1]))
+				return false;
+		}
+
+		//relação com quadrado esquerdo
+		if(restrictions[row][col] & GTR_THAN_LEFT){
+			if(num < board[row][col-1])
+				return false;	
+		} else if(restrictions[row][col] & LS_THAN_LEFT){
+			if((board[row][col-1] != 0) && (num > board[row][col-1]))
+				return false;
+		}
 	}
 
-	// Checa restrições(maior ou menor que algo):
-	// Explicação: 
-	// - Se AND der diferente de 0, a restrição está contida no conjunto de restrições.
 	
-
-	// relação com o quadrado inferior
-	if(restrictions[row][col] & GTR_THAN_BOTTOM){
-		if(num < board[row+1][col])
-			return false;
-	} else if(restrictions[row][col] & LS_THAN_BOTTOM){
-		if((board[row+1][col] != 0) && (num > board[row+1][col]))
-			return false;
-	}
-
-	//relação com quadrado superior
-	if(restrictions[row][col] & GTR_THAN_TOP){
-		if(num < board[row-1][col])
-			return false;
-	} else if(restrictions[row][col] & LS_THAN_TOP){
-		if((board[row-1][col] != 0) && (num > board[row-1][col]))
-			return false;
-	}
-
-	//relação com quadrado direito
-	if(restrictions[row][col] & GTR_THAN_RIGHT){
-		if(num < board[row][col+1])
-			return false;
-	} else if(restrictions[row][col] & LS_THAN_RIGHT){
-		if((board[row][col+1] != 0) && (num > board[row][col+1]))
-			return false;
-	}
-
-	//relação com quadrado esquerdo
-	if(restrictions[row][col] & GTR_THAN_LEFT){
-		if(num < board[row][col-1])
-			return false;	
-	} else if(restrictions[row][col] & LS_THAN_LEFT){
-		if((board[row][col-1] != 0) && (num > board[row][col-1]))
-			return false;
-	}
 
 	return true;
 }
@@ -174,25 +175,53 @@ bool isValid(char num, int row, int col){
 
 bool addNumber(){
 	++num_calls;
+	int emptyRow, emptyCol;
 	// busca espaço vazio
-	int emptyRow = 0, emptyCol = 0;
-	for(int i = 0; i < size; ++i){
-		for(int j = 0; j < size; ++j){
-			if(!board[i][j]){
-				emptyRow = i;
-				emptyCol = j;
-				goto searchEnd;
+	if(method == MRV){
+		priority_queue<_pair> ordered_possibilities; 
+		for(int i = 0; i < size; ++i){
+			for(int j = 0; j < size; ++j){
+				if(!board[i][j]){
+					ordered_possibilities.push(make_pair((char)(i*size + j), possibilities[i][j].count()));
+				}
 			}
 		}
+
+		if(ordered_possibilities.empty()){
+			return true; // se não encontrar nenhum espaço vazio é porque deu tudo certo
+		}
+
+		auto min = ordered_possibilities.top();
+		emptyRow = min.first / size;
+		emptyCol = min.first % size;
+
+	} else {
+		for(int i = 0; i < size; ++i){
+			for(int j = 0; j < size; ++j){
+				if(!board[i][j]){
+					emptyRow = i;
+					emptyCol = j;
+					goto searchEnd;
+				}
+			}
+		}
+		return true; // se não encontrar nenhum espaço vazio é porque deu tudo certo
 	}
-	return true;
 	searchEnd:
 	// testa todos os valores nessa posição
 	for(int n = 1; n <= size; ++n){
 		if(isValid(n, emptyRow, emptyCol)){
 			board[emptyRow][emptyCol] = n;
-			//===================== COM VERIFICAÇÃO ADIANTE ======================
-			if(method == FORWARD_CHECKING){
+			//============================= BACKTRACKING APENAS ===================
+			if(method == BACKTRACKING){
+				if(!addNumber()){ // se tiver chegado a um ponto sem solução
+					// desfaz a escolha
+					board[emptyRow][emptyCol] = 0; 
+				} else { // se deu certo
+					return true;
+				}
+			//===================== COM VERIFICAÇÃO ADIANTE(COM OU SEM MVR) ======================
+			} else {
 				_9bits savedRowPossibilities[size];
 				_9bits savedColPossibilities[size];
 				for(int i = 0; i < size; ++i){
@@ -211,15 +240,7 @@ bool addNumber(){
 				} else { // se deu certo
 					return true;
 				}
-			//============================= BACKTRACKING APENAS ===================
-			} else {
-				if(!addNumber()){ // se tiver chegado a um ponto sem solução
-					// desfaz a escolha
-					board[emptyRow][emptyCol] = 0; 
-				} else { // se deu certo
-					return true;
-				}
-			}
+			} 
 
 		}
 	}
@@ -227,11 +248,77 @@ bool addNumber(){
 }
 
 bool updatePossibilities(char num, int row, int col){
+	// atualiza quadrados da mesma linha ou mesma coluna
 	for(int i = 0; i < size; ++i){
+		// se não for o quadrado selecionado, retira a possibilidade do dígito em questão
 		if(i != col)	possibilities[row][i][num-1] = 0;
 		if(i != row)	possibilities[i][col][num-1] = 0;
-		if(possibilities[row][i] == 0 || possibilities[i][row] == 0){ // se acabar com as possibilidades de alguém
+		// testa se as modificações acabam com as possibilidades de alguém
+		if(possibilities[row][i] == 0 || possibilities[i][row] == 0){
 			return false;
+		}
+	}
+
+	// atualiza os valores daqueles que tem uma relação de desigualdade com ele
+	if(restrictions[row][col]){
+		// relação com o quadrado inferior
+		if(restrictions[row][col] & GTR_THAN_BOTTOM){
+			for(int i = size; i > num; --i){
+				possibilities[row+1][col][i-1] = 0;
+			}
+			if(possibilities[row+1][col] == 0)
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_BOTTOM){
+			for(int i = num; i > 0; --i){
+				possibilities[row+1][col][i-1] = 0;
+			}
+			if(possibilities[row+1][col] == 0)
+				return false;
+		}
+
+		//relação com quadrado superior
+		if(restrictions[row][col] & GTR_THAN_TOP){
+			for(int i = size; i > num; --i){
+				possibilities[row-1][col][i-1] = 0;
+			}
+			if(possibilities[row-1][col] == 0)
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_TOP){
+			for(int i = num; i > 0; --i){
+				possibilities[row-1][col][i-1] = 0;
+			}
+			if(possibilities[row-1][col] == 0)
+				return false;
+		}
+
+		//relação com quadrado direito
+		if(restrictions[row][col] & GTR_THAN_RIGHT){
+			for(int i = size; i > num; --i){
+				possibilities[row][col+1][i-1] = 0;
+			}
+			if(possibilities[row][col+1] == 0)
+				return false;
+		} else if(restrictions[row][col] & LS_THAN_RIGHT){
+			for(int i = num; i > 0; --i){
+				possibilities[row][col+1][i-1] = 0;
+			}
+			if(possibilities[row][col+1] == 0)
+				return false;
+		}
+
+		//relação com quadrado esquerdo
+		if(restrictions[row][col] & GTR_THAN_LEFT){
+			for(int i = size; i > num; --i){
+				possibilities[row][col-1][i-1] = 0;
+			}
+			if(possibilities[row][col-1] == 0)
+				return false;	
+		} else if(restrictions[row][col] & LS_THAN_LEFT){
+			for(int i = num; i > 0; --i){
+				possibilities[row][col-1][i-1] = 0;
+			}
+			if(possibilities[row][col-1] == 0)
+				return false;
 		}
 	}
 

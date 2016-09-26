@@ -4,9 +4,13 @@
 #include <iostream>
 #include <bitset>
 #include <chrono>
+#include <utility> 
+#include <queue>
 
 #define MAX_SIZE 9
-#define BACKTRACKING 0 // backtracing sozinho
+
+// Flags que determinam as técnicas a serem utilizadas
+#define BACKTRACKING 0 // backtracking sozinho
 #define FORWARD_CHECKING 1 // backtracking com verificação adiante
 #define MRV 2 // backtracking com verificação adiante e mínimos valores remanescentes
 
@@ -24,6 +28,7 @@
 using namespace std;
 
 typedef bitset<9> _9bits;
+typedef	pair<char, size_t> _pair;
 
 void solve(char l_method);
 bool addNumber();

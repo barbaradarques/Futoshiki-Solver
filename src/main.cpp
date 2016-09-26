@@ -8,7 +8,7 @@ int main(){
 	cin >> tests;
 	for(int i = 1; i <= tests; ++i){
 		cout << i << endl;
-		solve(FORWARD_CHECKING);
+		solve(MRV); // flags possíveis = {BACKTRACKING, FORWARD_CHECKING, MRV}
 	}
 	return 0;
 }
