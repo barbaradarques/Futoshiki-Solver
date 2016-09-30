@@ -18,7 +18,7 @@ void solve(char l_method){
 	cin >> size;
 	cin >> numRestrictions;
 	method = l_method; // <<<<<<< mudar dps pra leitura aqui dentro (ao invés de passar argumento)
-	num_calls = 0; // número de chamadas recursivas/ atribuições feitas
+	num_calls = 0; // número de chamadas recursivas/atribuições feitas
 	resetRestrictions();
 	resetPossibilities();
 	// seta os valores iniciais
@@ -40,15 +40,30 @@ void solve(char l_method){
 	addNumber();
 	end = chrono::steady_clock::now();
 	printBoard();
-	cout << num_calls << " chamadas em ";
+	if(num_calls<MAX_CALLS){
+		cout << num_calls << " chamadas em ";
+	} else {
+		int zeros = 0;
+		for(int i = 0, digit = 0; i < size; ++i){
+			for(int j = 0; j < size; ++j){
+				if(!board[i][j]){
+					++zeros;
+				}
+			}
+		}
+		cout << "A execução excedeu o número máximo de atribuições(10^6)."<< endl;
+
+		cout << (double)zeros/(size*size)*100 <<"\% do tabuleiro foi completado em "; // <<<<<<<<<<<<<< mudar nome de 'tabuleiro'
+	}
 	cout << chrono::duration_cast<chrono::duration<double> > (end-start).count() << "s." << endl;
 }
 
 void printBoard(){
 	for(int i = 0; i < size; ++i){
-		for(int j = 0; j < size; ++j){
-			cout << board[i][j] << " "; // consertar pra não imprimir espaço extra no final da linha <<<<<<
+		for(int j = 0; j < size-1; ++j){
+			cout << board[i][j] << " "; 
 		}
+		cout << board[i][size-1]; // o último dígito da linha não é seguido de espaço
 		cout << endl;
 	}
 }
@@ -74,10 +89,6 @@ void resetPossibilities(){
 	}
 }
 
-/*
- 	Explicação detalhada da lógica por trás da matriz de restrições pode ser encontrada no relatório.
- */
-
 void setRestriction(int row1, int col1, int row2, int col2){
 	if(row1 == row2){ // se estiverem na mesma linha
 		if(col1 < col2){ // se o menor está mais à esquerda 
@@ -87,7 +98,7 @@ void setRestriction(int row1, int col1, int row2, int col2){
 			restrictions[row1][col1] |= LS_THAN_LEFT;
 			restrictions[row2][col2] |= GTR_THAN_RIGHT;
 		}
-	} else if(col1 == col2){ // teste redundante, pois se as linhas não são iguais, as colunas têm que ser <<
+	} else { // se estiverem na mesma coluna 
 		if(row1 < row2){ // se o menor está mais acima
 			restrictions[row1][col1] |= LS_THAN_BOTTOM;
 			restrictions[row2][col2] |= GTR_THAN_TOP;
@@ -98,7 +109,6 @@ void setRestriction(int row1, int col1, int row2, int col2){
 	}
 }
 
-// talvez usar ponteiro pra função dependendo da flag? <<<<<<<<<<
 
 bool isValid(char num, int row, int col){
 	
@@ -174,6 +184,9 @@ bool isValid(char num, int row, int col){
 
 
 bool addNumber(){
+	if(num_calls == MAX_CALLS){ // se já tiver atingido o número máximo de atribuições
+		return true;
+	}
 	++num_calls;
 	int emptyRow, emptyCol;
 	// busca espaço vazio

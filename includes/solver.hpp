@@ -8,6 +8,7 @@
 #include <queue>
 
 #define MAX_SIZE 9
+#define MAX_CALLS 1000000
 
 // Flags que determinam as técnicas a serem utilizadas
 #define BACKTRACKING 0 // backtracking sozinho
