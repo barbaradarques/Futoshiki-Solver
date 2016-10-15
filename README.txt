@@ -1,6 +1,6 @@
-=================================================================================================
-									FUTOSHIKI SOLVER
-=================================================================================================
+================================================================================
+                                FUTOSHIKI SOLVER								
+================================================================================
 
 
 - DESCRIÇÃO:
@@ -13,13 +13,13 @@
 
 - COMO EXECUTAR:
 
-	Para resolver usando backtracking simples:
+	Usando backtracking simples:
 		make backtracking
 
-	Para resolver usando backtracking com verificação adiante:
+	Usando backtracking com verificação adiante:
 		make forward_checking
 
-	Para resolver usando backtracking com verificação adiante e mínimos valores remanescentes:
+	Usando backtracking com verificação adiante e mínimos valores remanescentes:
 		make mrv
 
 
