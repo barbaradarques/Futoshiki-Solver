@@ -12,8 +12,8 @@ bool operator<(const _pair & a, const _pair & b){
     return (a.second > b.second);                                    
 } 
 
-
-void solve(char l_method){
+// resolve a partida, imprime o resultado no console e salva os resultados de benchmark em arquivo
+void solve(char l_method, ofstream& file){
 	int numRestrictions; // quantidade de restrições
 	cin >> size;
 	cin >> numRestrictions;
@@ -36,26 +36,37 @@ void solve(char l_method){
 		cin >> row1 >> col1 >> row2 >> col2; 
 		setRestriction(row1-1, col1-1, row2-1, col2-1); // corrige para início da contagem em 0
 	}
-	chrono::steady_clock::time_point start = chrono::steady_clock::now(), end;
-	addNumber();
-	end = chrono::steady_clock::now();
-	printBoard();
-	if(num_calls<MAX_CALLS){
-		cout << num_calls << " chamadas em ";
-	} else {
-		int zeros = 0;
-		for(int i = 0, digit = 0; i < size; ++i){
-			for(int j = 0; j < size; ++j){
-				if(!board[i][j]){
-					++zeros;
-				}
-			}
-		}
-		cout << "A execução excedeu o número máximo de atribuições(10^6)."<< endl;
 
-		cout << (double)zeros/(size*size)*100 <<"\% do tabuleiro foi completado em "; // <<<<<<<<<<<<<< mudar nome de 'tabuleiro'
-	}
-	cout << chrono::duration_cast<chrono::duration<double> > (end-start).count() << "s." << endl;
+	// tempo no início da execução
+	auto start = chrono::steady_clock::now();
+	// inicia a recursão
+	addNumber();
+	// tempo no final da execução
+	auto end = chrono::steady_clock::now();
+
+
+	// imprime o tabuleiro resolvido
+	printBoard();
+
+	// salva a dimensão do tabuleiro, o número de atribuições e o tempo de execução em arquivo
+	file << size << "," << num_calls << ", " << chrono::duration_cast<chrono::duration<double, milli> >(end-start).count() << endl;
+	file.flush();
+	// if(num_calls<MAX_CALLS){
+		// cout << num_calls << " chamadas em ";
+	// } else {
+	// 	int zeros = 0;
+	// 	for(int i = 0, digit = 0; i < size; ++i){
+	// 		for(int j = 0; j < size; ++j){
+	// 			if(!board[i][j]){
+	// 				++zeros;
+	// 			}
+	// 		}
+	// 	}
+	// 	cout << "A execução excedeu o número máximo de atribuições(10^6)."<< endl;
+
+	// 	cout << (double)zeros/(size*size)*100 <<"\% do tabuleiro foi completado em "; // <<<<<<<<<<<<<< mudar nome de 'tabuleiro'
+	// }
+	// cout << chrono::duration_cast<chrono::duration<double> > (end-start).count() << "s." << endl;
 }
 
 void printBoard(){
@@ -184,9 +195,9 @@ bool isValid(char num, int row, int col){
 
 
 bool addNumber(){
-	if(num_calls == MAX_CALLS){ // se já tiver atingido o número máximo de atribuições
-		return true;
-	}
+	// if(num_calls == MAX_CALLS){ // se já tiver atingido o número máximo de atribuições
+	// 	return true;
+	// }
 	++num_calls;
 	int emptyRow, emptyCol;
 	// busca espaço vazio
