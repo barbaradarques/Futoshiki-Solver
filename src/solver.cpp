@@ -50,16 +50,30 @@ void solve(char l_method, ofstream& file){
 	// imprime o tabuleiro resolvido
 	printBoard();
 
-	// salva a dimensão do tabuleiro, o número de atribuições e o tempo de execução em arquivo
-	file << size << "," << num_calls << ", " << chrono::duration_cast<chrono::duration<double, milli> >(end-start).count() << endl;
+
+	// salva em arquivo a dimensão do tabuleiro, o número de atribuições, o tempo gasto na solução
+	// e quanto do tabuleiro deu pra ser resolvido dentro do número máximo de atribuições possíveis 
+	int filled = 0;
+	for(int i = 0, digit = 0; i < size; ++i){
+		for(int j = 0; j < size; ++j){
+			if(board[i][j]){
+				++filled;
+			}
+		}
+	}
+	
+	file << size << "," << num_calls << ", " << chrono::duration_cast<chrono::duration<double, milli> >(end-start).count();
+	file << "," << (double)filled/(size*size)*100 << endl;		
 	file.flush();
 }
 
 // **função recursiva base do backtracking**
 // preenche a próxima posição vazia no tabuleiro
 bool addNumber(){
+	if(num_calls == MAX_CALLS){ // se já tiver atingido o número máximo de atribuições
+		return true;
+	}
 	++num_calls;
-
 	int emptyRow, emptyCol; // linha e coluna do próximo espaço vazio
 
 	// busca espaço vazio

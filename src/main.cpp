@@ -20,7 +20,7 @@ int main(int argc, char const *argv[]){
 			break;
 	}
 
-	file << "# do Teste, Dimensão do Tabuleiro, Número de Atribuições, Tempo de Execução (em milissegundos)\n";
+	file << "# do Teste, Dimensão do Tabuleiro, Número de Atribuições, Tempo de Execução (em milissegundos), \% do Tabuleiro Completado\n";
 	file.flush();
 
 	int tests;
