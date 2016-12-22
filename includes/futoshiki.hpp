@@ -1,5 +1,5 @@
-#ifndef _SOLVER_HPP
-#define _SOLVER_HPP
+#ifndef _FUTOSHIKI_HPP
+#define _FUTOSHIKI_HPP
 
 #include <iostream>
 #include <bitset>
@@ -33,13 +33,26 @@ using namespace std;
 typedef bitset<9> _9bits;
 typedef	pair<char, size_t> _pair;
 
-void solve(char l_method, ofstream& file);
-bool addNumber();
-void printBoard();
-void printRestrictions();
-void resetRestrictions();
-void resetPossibilities();
-bool updatePossibilities(char num, int row, int col);
-bool isValid(char num, int row, int col);
-void setRestriction(int row1, int col1, int row2, int col2);
+class Futoshiki {
+	private:
+		int  size_, board_[MAX_SIZE][MAX_SIZE], num_calls_; 
+		char restrictions_[MAX_SIZE][MAX_SIZE]; // guarda as restrições de maior e menor de cada posição
+		_9bits possibilities_[MAX_SIZE][MAX_SIZE]; // guarda os dígitos disponíveis para cada posição
+		char method_; // método utilizado na solução 
+		ofstream& file_;
+		bool fillNextBCK();
+		bool fillNextFC();
+		bool fillNextMRV();
+		void printBoard();
+		void printRestrictions();
+		void resetRestrictions();
+		void resetPossibilities();
+		bool updatePossibilities(char num, int row, int col);
+		bool isValid(char num, int row, int col);
+		void setRestriction(int row1, int col1, int row2, int col2);
+	public:
+		Futoshiki(char method, ofstream& file);
+		void solve();
+};
+
 #endif

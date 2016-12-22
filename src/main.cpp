@@ -1,5 +1,5 @@
 #include <iostream>
-#include "solver.hpp"
+#include "futoshiki.hpp"
 
 using namespace std;
 
@@ -26,11 +26,12 @@ int main(int argc, char const *argv[]){
 	int tests;
 	cin >> tests;
 
+	Futoshiki futo(method, file);
 	
 	for(int i = 1; i <= tests; ++i){
 		cout << i << endl;
 		file << i << ",";
-		solve(method, file); 
+		futo.solve(); 
 	}
 
 	file.close();
