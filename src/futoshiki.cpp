@@ -5,15 +5,18 @@ using namespace std;
 
 
 // sobrecarrega o operador de comparação do _pair a fim de inverter a ordem da fila de prioridade                                      
-bool operator<(const _pair & a, const _pair & b){   
-    return (a.second > b.second);                                    
-} 
+struct Compare {
+    bool operator()(_pair& a, _pair& b) {
+        return a.second > b.second;
+    }
+};
+
 
 Futoshiki::Futoshiki(char method, ofstream& file)
 	: method_(method), file_(file){}
 
-// resolve a partida, imprime o resultado no console e salva os resultados de benchmark em arquivo
-void Futoshiki::solve(){
+
+void Futoshiki::init(){
 	int numRestrictions; // quantidade de restrições
 	cin >> size_;
 	cin >> numRestrictions;
@@ -36,13 +39,14 @@ void Futoshiki::solve(){
 		cin >> row1 >> col1 >> row2 >> col2; 
 		setRestriction(row1-1, col1-1, row2-1, col2-1); // corrige para início da contagem em 0
 	}
+}
 
+// resolve a partida, imprime o resultado no console e salva os resultados de benchmark em arquivo
+void Futoshiki::solve(){
 	// tempo no início da execução
 	auto start = chrono::steady_clock::now();
 
 	// inicia a recursão
-	// fillNext();
-
 	switch(method_){
 		case BACKTRACKING:
 			fillNextBCK();
@@ -60,7 +64,6 @@ void Futoshiki::solve(){
 
 	// imprime o tabuleiro resolvido
 	printBoard();
-
 
 	// salva em arquivo a dimensão do tabuleiro, o número de atribuições, o tempo gasto na solução
 	// e quanto do tabuleiro deu pra ser resolvido dentro do número máximo de atribuições possíveis 
@@ -181,7 +184,7 @@ bool Futoshiki::fillNextMRV(){
 	// busca espaço vazio
 
 	// ordena as posições em # de possibilidades crescente
-	priority_queue<_pair> ordered_possibilities; // <posição no tabuleiro, # de possibilidades>
+	priority_queue<_pair, vector<_pair>, Compare> ordered_possibilities; // <posição no tabuleiro, # de possibilidades>
 	for(int i = 0; i < size_; ++i){
 		for(int j = 0; j < size_; ++j){
 			if(!board_[i][j]){
@@ -198,7 +201,6 @@ bool Futoshiki::fillNextMRV(){
 	auto min = ordered_possibilities.top(); 
 	emptyRow = min.first / size_;
 	emptyCol = min.first % size_;
-
 	
 	// testa todos os valores nessa posição
 	for(int n = 1; n <= size_; ++n){

@@ -10,7 +10,7 @@
 #include <fstream>
 
 #define MAX_SIZE 9
-#define MAX_CALLS 100000000
+#define MAX_CALLS 1000000
 
 // Flags que determinam as técnicas a serem utilizadas
 #define BACKTRACKING '1' // backtracking sozinho
@@ -53,6 +53,7 @@ class Futoshiki {
 	public:
 		Futoshiki(char method, ofstream& file);
 		void solve();
+		void init();
 };
 
 #endif

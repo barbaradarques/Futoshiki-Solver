@@ -31,6 +31,7 @@ int main(int argc, char const *argv[]){
 	for(int i = 1; i <= tests; ++i){
 		cout << i << endl;
 		file << i << ",";
+		futo.init();
 		futo.solve(); 
 	}
 
